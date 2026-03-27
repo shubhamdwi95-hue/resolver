@@ -11,13 +11,13 @@ public class GlobalExceptionHandler {
     
 @ExceptionHandler(MethodArgumentNotValidException.class)
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public String handleValidationException(MethodArgumentNotValidException ex){
+public ErrorResponse handleValidationException(MethodArgumentNotValidException ex){
 
-    return ex.getBindingResult()
+    String message= ex.getBindingResult()
     .getFieldError()
     .getDefaultMessage();
 
-}
+    return new ErrorResponse("Validation failed", message);
 
-
-}
+    }
+  }
