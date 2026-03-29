@@ -3,7 +3,7 @@ package com.resolver.controller;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.resolver.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +17,9 @@ import com.resolver.repository.UserRepository;
 import com.resolver.security.JwtUtil;
 import com.resolver.repository.RefreshTokenRepository;
 import com.resolver.repository.UserRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,7 +39,11 @@ private UserRepository userRepository;
 
 @Autowired
 private RefreshTokenRepository refreshTokenRepository;
-  
+
+@Autowired
+private JwtUtil jwtUtil;
+
+private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 // LOGIN API
     @PostMapping("/login")
@@ -48,10 +55,7 @@ private RefreshTokenRepository refreshTokenRepository;
 
         if(passwordEncoder.matches(password, user.getPassword())) {
 
-            String accessToken = JwtUtil.generateToken(
-                    user.getUsername(),
-                    user.getRole()
-            );
+            String accessToken = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
             RefreshToken refreshToken =
                     refreshTokenService.createRefreshToken(user.getUsername());
@@ -60,9 +64,10 @@ private RefreshTokenRepository refreshTokenRepository;
             tokens.put("accessToken", accessToken);
             tokens.put("refreshToken", refreshToken.getToken());
 
+            logger.info("Login attempt for user: {}", username);
             return tokens;
         }
-
+       logger.info("Login attempt for user: {}", username);
         throw new RuntimeException("Invalid credentials");
     }
 
@@ -80,13 +85,10 @@ public Map<String, String> refresh(@RequestParam String refreshToken) {
     User user = userRepository.findByUsername(token.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    String newAccessToken = JwtUtil.generateToken(
-            user.getUsername(),
-            user.getRole()
-    );
+   String accessToken = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
     Map<String, String> response = new HashMap<>();
-    response.put("accessToken", newAccessToken);
+    response.put("accessToken", accessToken);
 
     return response;
 }

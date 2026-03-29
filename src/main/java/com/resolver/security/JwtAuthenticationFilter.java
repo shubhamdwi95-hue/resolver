@@ -9,12 +9,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
+@Autowired
+private JwtUtil jwtUtil;
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -27,10 +28,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String token = authHeader.substring(7);
 
-            if (JwtUtil.validateToken(token)) {
+            if (jwtUtil.validateToken(token)) {
 
-                String username = JwtUtil.extractUsername(token);
-                String role = JwtUtil.extractRole(token);
+                String username = jwtUtil.extractUsername(token);
+                String role = jwtUtil.extractRole(token);
 
                 if (username != null &&
                         SecurityContextHolder.getContext().getAuthentication() == null) {

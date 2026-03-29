@@ -4,40 +4,45 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
+@Component
 public class JwtUtil {
 
-    private static final String SECRET = "mysecretkeymysecretkeymysecretkey";
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private static final long EXPIRATION_TIME = 900000; // 15 minutes
+    private final long EXPIRATION_TIME = 900000; // 15 minutes
 
-    // Generate JWT Token
-    public static String generateToken(String username, String role) {
+    // Generate token
+    public String generateToken(String username, String role) {
 
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET.getBytes())
+                .signWith(SignatureAlgorithm.HS256, secret.getBytes())
                 .compact();
     }
 
     // Extract username
-    public static String extractUsername(String token) {
+    public String extractUsername(String token) {
 
         return getClaims(token).getSubject();
     }
 
     // Extract role
-    public static String extractRole(String token) {
+    public String extractRole(String token) {
 
         return getClaims(token).get("role", String.class);
     }
 
     // Validate token
-    public static boolean validateToken(String token) {
+    public boolean validateToken(String token) {
 
         try {
             getClaims(token);
@@ -47,11 +52,10 @@ public class JwtUtil {
         }
     }
 
-    // Extract all claims
-    private static Claims getClaims(String token) {
+    private Claims getClaims(String token) {
 
         return Jwts.parser()
-                .setSigningKey(SECRET.getBytes())
+                .setSigningKey(secret.getBytes())
                 .parseClaimsJws(token)
                 .getBody();
     }

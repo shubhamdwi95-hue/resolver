@@ -7,11 +7,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-
+import com.resolver.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+ @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -24,13 +29,14 @@ public class SecurityConfig {
                 "/auth/login",
                 "/auth/refresh",
                 "/swagger-ui/**",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/actuator/**"
         ).permitAll()
         .requestMatchers("/tickets/**").hasAnyRole("ADMIN","USER")
         .anyRequest().authenticated()
 )
 
-            .addFilterBefore(new JwtAuthenticationFilter(),
+            .addFilterBefore(jwtAuthenticationFilter(),
                     UsernamePasswordAuthenticationFilter.class);
 
             
