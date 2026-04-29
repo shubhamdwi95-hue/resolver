@@ -30,9 +30,11 @@ public class SecurityConfig {
                 "/auth/refresh",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/actuator/**"
+                "/actuator/**",
+                "/rabbit-test",
+                "/tickets"
         ).permitAll()
-        .requestMatchers("/tickets/**").hasAnyRole("ADMIN","USER")
+        .requestMatchers("/tickets/**").permitAll()
         .anyRequest().authenticated()
 )
 

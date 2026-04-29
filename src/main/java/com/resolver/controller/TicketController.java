@@ -3,6 +3,7 @@ package com.resolver.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,9 +36,15 @@ public Ticket createTicket(@Valid @RequestBody TicketRequest request){
 }
 
 @GetMapping
-public List<Ticket> getAllTickets(){
+public List<Ticket> getAllTickets() throws InterruptedException
+{
+    Thread.sleep(3000);
+    System.out.println("Resolver called");
     return ticketService.getAllTickets();
 }
-
+@GetMapping("/{id}")
+public Ticket getTicket(@PathVariable Long id) throws InterruptedException {
+    return ticketService.getTicketById(id);
+}
 
 }
